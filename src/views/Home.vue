@@ -10,7 +10,7 @@
             <button @click="dtr_log" class="w-full bg-rose-600 text-white text-lg py-3 my-2 rounded-full hover:bg-rose-700 active:scale-96 transition duration-150">
                 {{ log_type == 1 ? 'TIME OUT' : 'TIME IN' }}
             </button>
-             <button @click="transfer_attlogs" 
+             <button @click="confirm_transfer_attlogs" 
              class="w-full bg-blue-600 text-white text-sm py-2 my-2 rounded-full hover:bg-blue-700 active:scale-96 transition duration-150">
                 Transfer Attlogs ({{ for_transfer.length }})
             </button>
@@ -38,6 +38,8 @@
                 </div>
             </div>  
         </div>
+        <ConfirmModal :options="confirm_modal" @confirm="transfer_attlogs"/>
+
     </div>
 </template>
 
@@ -47,7 +49,13 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { loader } from '@/stores/loaderStore'
 import { alertmodal } from '@/stores/alertStore'
 import { saveLogs } from '@/api/api'
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
+const confirm_modal = reactive({
+  type: 'confirm',
+  status: false,
+  message: '',
+})
 
 const dateObject = reactive({
   date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -121,10 +129,15 @@ const dtr_log = async () => {
     })
     sessionStore.updateLogs(attlogs.value)
     loader.hide()
+    alertmodal.show('Notice', 'Log has been added')
   }, 500);
 }
 
 
+const confirm_transfer_attlogs = () => {
+  confirm_modal.status = true
+  confirm_modal.message = 'Are you sure you want to transfer the logs?'
+}
 const transfer_attlogs = async () => {
   if(for_transfer.value.length == 0){
       return alertmodal.show('Notice', 'No logs to transfer')
@@ -145,6 +158,7 @@ const transfer_attlogs = async () => {
       })
     )
     loader.hide()
+    alertmodal.show('Notice', 'Logs has been transfered')
 }
 
 
